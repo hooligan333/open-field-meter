@@ -1,0 +1,46 @@
+{
+  "about": "meter: a meter other than 4/4 for the unit (1/4 to 16/4, 1/8 to 16/8), chosen on a page of its own (shift and help, in any mode) and kept with the tape under the key meter. The metronome accents the first beat of each bar; an x/8 meter clicks on eighth notes (or on quarter notes, the owner's choice). The tape follows the meter: its bar lines, its grid lines, its snap unit (and with it the keys that jump along the tape) and the bar that winding by hand stops at. Version 4: the count-in is one bar of the meter's clicks. Eight places of OS 1.7.3+0: a jump with a trampoline at the metronome's beat function; four calls of on-chip routines, each with a room, where the pack hands the firmware its own count or dividend; a jump with a trampoline at the count-in's step function; the load of the count-in record's address in the metronome's tick; and a jump with a trampoline at the load of the number the count-in's popup prints (profile.json). At 4/4 each runs as it came. OS 1.7.3+0 under open-field 0.12 or later only.",
+  "name": "meter",
+  "version": 4,
+  "interface": 1,
+  "build": "meter",
+  "sources": [
+    "examples/meter/meter.cpp",
+    "examples/meter/meter_hook.s",
+    "examples/meter/meter_tape.s",
+    "examples/meter/meter_countin.s",
+    "examples/meter/meter_card.s",
+    "examples/meter/meter_table.s"
+  ],
+  "works_with": [],
+  "serves": [],
+  "exports": [],
+  "pictures": [],
+  "card": {
+    "level": 7,
+    "frame": "meter_frame",
+    "pick": null,
+    "pictures": false,
+    "input": "meter_input",
+    "folders": [],
+    "asks": [
+      {
+        "kind": "keeps",
+        "name": "meter",
+        "changed": "meter_changed",
+        "keys": [
+          {
+            "name": "meter",
+            "files": [
+              "tape"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "marks": [],
+  "named": true,
+  "sum": true,
+  "path": null
+}

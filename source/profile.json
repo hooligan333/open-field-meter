@@ -1,0 +1,145 @@
+{
+ "schema": 2,
+ "id": "op1f-1.7.3-meter",
+ "device": "OP-1 Field",
+ "firmware_version": "1.7.3+0",
+ "cpu": "bf703",
+ "about": [
+  "The places where the pack `meter` (version 4) changes OS 1.7.3+0 of the OP-1 Field. No byte of the firmware is in this file: addresses and checksums only.",
+  "Step 1: the first instruction of the metronome's beat function. Version 3: four eight-byte calls of on-chip routines by which the tape follows the meter. Version 4: three places by which the count-in follows the meter: the first instruction of the count-in's step function, the load of the count-in record's address in the metronome's tick, and the load of the number the count-in's popup prints (meter-4/NOTES.md). The sums were worked out by the owner from their own os.ldr (SHA-256 d134eb1a...); tools/place_sum.py holds the profile against that file."
+ ],
+ "stock_sha256": "d134eb1ac7ad88e8370d988329cd5d7419f016005b1d269034f9cf7166fad0ec",
+ "stock_bytes": 2079016,
+ "module_base": "0x8d2e4234",
+ "reserved_bytes": 2097152,
+ "patches": [
+  {
+   "address": "0x8f00ef54",
+   "length": 8,
+   "sum": "0x88644db8",
+   "group": "meter",
+   "name": "The first instruction of the metronome's beat function, which answers the beat number, or -1 when there is no beat; its one caller accents the beat when the number's two low bits are 1."
+  },
+  {
+   "address": "0x8fc83362",
+   "length": 8,
+   "sum": "0xce2a76f1",
+   "group": "meter",
+   "name": "Place A: in the tape grid's function, the call that turns the grid setting N (a float) into an integer, which the function uses as the count of lines to a bar."
+  },
+  {
+   "address": "0x8fc8338e",
+   "length": 8,
+   "sum": "0x6c7cee2a",
+   "group": "meter",
+   "name": "Place B: later in the same function, the call of the divide for the line spacing, 240.0 over bpm x N."
+  },
+  {
+   "address": "0x8fc9f19a",
+   "length": 8,
+   "sum": "0x6c7cee2a",
+   "group": "meter",
+   "name": "Place C: in the function that gives the grid/snap unit in frames, the call of the same divide, 10584000.0 over bpm x N."
+  },
+  {
+   "address": "0x8c0c2ca2",
+   "length": 8,
+   "sum": "0x6c7cee2a",
+   "group": "meter",
+   "name": "Place D: where winding the tape by hand looks for the bar to stop at, the call of the same divide, 240.0 over bpm."
+  },
+  {
+   "address": "0x8f01fd00",
+   "length": 8,
+   "sum": "0x278dbbd2",
+   "group": "meter",
+   "name": "The first instructions of the count-in's step function, which the audio loop calls once a block with the count-in's record."
+  },
+  {
+   "address": "0x8f00f180",
+   "length": 8,
+   "sum": "0xbe0a46fc",
+   "group": "meter",
+   "name": "In the metronome's tick: the instruction that loads the address of the count-in's record into a register, through which the tick then reads whether a count-in runs, whether its beats left changed in this block, and the beats left (for the accent)."
+  },
+  {
+   "address": "0x8fc5fc64",
+   "length": 8,
+   "sum": "0xbd8aa0bf",
+   "group": "meter",
+   "name": "In the draw function of the count-in's popup: the instruction that loads the beats left as the popup last saw them; the function prints 4 minus that."
+  }
+ ],
+ "image": [],
+ "tables": [
+  {
+   "file": "examples/meter/meter_table.s",
+   "part": "meter",
+   "symbol": "op1f_boot_table",
+   "entries": [
+    {
+     "address": "0x8f00ef54",
+     "form": "jump",
+     "target": "meter_beat_entry",
+     "room": "meter_beat_room",
+     "copies": 8,
+     "does": "Ours runs the firmware's beat function once through a trampoline of eight bytes, with the caller's registers and stack, then gives the caller 1 on the first beat of a bar of the pack's meter, 2 on any other beat, and -1 as the function answered it."
+    },
+    {
+     "address": "0x8fc83362",
+     "form": "call",
+     "target": "meter_tape_a",
+     "room": "meter_tape_a_room",
+     "copies": 8,
+     "does": "Ours asks its own function how many lines make a bar of the pack's meter at the tape's grid setting. For the firmware's own (4/4, 8/8) it puts every register back as it came and jumps to its room, where the firmware's call runs unchanged; else it returns that count behind the place in place of the routine's answer."
+    },
+    {
+     "address": "0x8fc8338e",
+     "form": "call",
+     "target": "meter_tape_b",
+     "room": "meter_tape_b_room",
+     "copies": 8,
+     "does": "Ours asks its own function for the dividend of the line spacing, puts every register back as it came, R0 with that dividend when there is one, and jumps to its room, where the firmware's own call of the divide runs and returns behind the place."
+    },
+    {
+     "address": "0x8fc9f19a",
+     "form": "call",
+     "target": "meter_tape_c",
+     "room": "meter_tape_c_room",
+     "copies": 8,
+     "does": "Ours asks its own function for the dividend of the snap unit (one grid line of the pack's meter), puts every register back as it came, R0 with that dividend when there is one, and jumps to its room, where the firmware's own call of the divide runs and returns behind the place."
+    },
+    {
+     "address": "0x8c0c2ca2",
+     "form": "call",
+     "target": "meter_tape_d",
+     "room": "meter_tape_d_room",
+     "copies": 8,
+     "does": "Ours asks its own function for the dividend of the bar (a bar of the pack's meter), puts every register back as it came, R0 with that dividend when there is one, and jumps to its room, where the firmware's own call of the divide runs and returns behind the place."
+    },
+    {
+     "address": "0x8f01fd00",
+     "form": "jump",
+     "target": "meter_countin_entry",
+     "room": "meter_countin_room",
+     "copies": 8,
+     "does": "Ours runs the firmware's step function once through a trampoline of eight bytes, with the caller's registers and stack, then has its own function set the count-in's length while none runs and keep the pack's own copy of the record, and returns to the caller with every register as the function left it."
+    },
+    {
+     "address": "0x8f00f180",
+     "form": "load",
+     "target": "meter_countin_record",
+     "does": "The address becomes that of the pack's own record of the count-in, which ours keeps every block behind the firmware's step function: at four quarter-note clicks a copy of the firmware's, else the same with the pack's own clicks and the accent on the last of them."
+    },
+    {
+     "address": "0x8fc5fc64",
+     "form": "jump",
+     "target": "meter_popup_load",
+     "room": "meter_popup_load_room",
+     "copies": 8,
+     "does": "Ours has its own function set the number about to be loaded, when a count-in of the pack's length runs, so that the popup counts 1 to the number of clicks; then it puts every register back as it came and jumps to its room, where the firmware's own load runs and goes on behind the place."
+    }
+   ]
+  }
+ ]
+}
